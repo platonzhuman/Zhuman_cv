@@ -1,27 +1,27 @@
 import numpy as np
 from skimage.measure import label, regionprops
+from skimage.morphology import erosion
 
 image = np.load("stars.npy")
-
+#решил проще просто от общего отнять квадраты
 def star(image):
     labeled = label(image)
-    region = regionprops(labeled)
+    reg = regionprops(labeled)
     
-    pl_count = 0
-    cr_count = 0
+    al = len(reg)
     
-    for reg in region:
-        star_image = reg.image
-        
-        pixel = star_image[0, 0] + star_image[0, -1] + \
-                        star_image[-1, 0] + star_image[-1, -1]
-        
-        if pixel > 0:
-            cr_count += 1
-        else:
-            pl_count += 1
+    count_kvadrat = 0
+    
+    struct = np.ones((3, 3))
+    
+    for i in reg:
+        if np.any(erosion(i.image, footprint=struct)):
+            count_kvadrat += 1
             
-    return pl_count, cr_count
+    star_count = al - count_kvadrat
+    return star_count
 
-p, c = star(image)
-print(f"плюсов: {p}, керестов: {c}")
+result = star(image)
+print(f"count stars = {result}")
+
+
